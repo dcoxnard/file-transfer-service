@@ -5,7 +5,13 @@ import crypto from 'crypto';
 const storage = multer.memoryStorage();
 export const upload = multer({ storage });
 
-const fileStore = new Map<string, Buffer>();
+interface StoredFile {
+  buffer: Buffer;
+  originalName: string;
+  mimeType: string;
+}
+
+const fileStore = new Map<string, StoredFile>();
 
 // 👇 This is the key fix:
 interface MulterRequest extends Request {
@@ -18,7 +24,11 @@ export const handleUpload = (req: MulterRequest, res: Response) => {
   }
 
   const fileId = crypto.randomUUID();
-  fileStore.set(fileId, req.file.buffer);
+  fileStore.set(fileId, {
+    buffer: req.file.buffer,
+    originalName: req.file.originalname,
+    mimeType: req.file.mimetype,
+  });
 
   const downloadUrl = `/api/download/${fileId}`;
 
@@ -32,14 +42,18 @@ export const handleUpload = (req: MulterRequest, res: Response) => {
 
 export const handleDownload = (req: Request, res: Response) => {
   const { fileId } = req.params;
-  const file = fileStore.get(fileId);
+  const stored = fileStore.get(fileId);
 
-  if (!file) {
+  if (!stored) {
     return res.status(404).json({ error: 'File not found or expired' });
   }
 
-  fileStore.delete(fileId);
+  fileStore.delete(fileId); // one-time download
 
-  res.setHeader('Content-Disposition', `attachment; filename="file.bin"`);
-  res.send(file);
+  res.setHeader('Content-Type', stored.mimeType);
+  res.setHeader(
+    'Content-Disposition',
+    `attachment; filename="${stored.originalName}"`
+  );
+  res.send(stored.buffer);
 };
