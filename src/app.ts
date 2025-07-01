@@ -1,7 +1,13 @@
 import express from 'express';
-import routes from './routes';
+import path from 'path';
 
 const app = express();
-app.use(express.json());
-app.use('/api', routes);
+
+// Serve files in the public directory (e.g. index.html)
+app.use(express.static(path.join(__dirname, '..', 'public')));
+
+// Your existing API routes
+import router from './routes';
+app.use('/api', router);
+
 export default app;
