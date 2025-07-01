@@ -1,6 +1,13 @@
-import { Router } from "express";
-import uploadRoutes from "./upload.route";
+import { Router } from 'express';
+import {
+  upload,
+  handleUpload,
+  handleDownload,
+} from '../controllers/upload.controller';
 
 const router = Router();
-router.use("/upload", uploadRoutes);
+
+router.post('/upload', upload.single('file'), handleUpload);
+router.get('/download/:fileId', handleDownload);
+
 export default router;

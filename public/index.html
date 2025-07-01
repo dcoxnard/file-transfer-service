@@ -12,14 +12,19 @@
     </form>
 
     <pre id="result"></pre>
+    <div id="download-link"></div>
 
     <script>
       const form = document.getElementById('uploadForm');
       const result = document.getElementById('result');
+      const linkDiv = document.getElementById('download-link');
 
       form.addEventListener('submit', async (e) => {
         e.preventDefault();
         const formData = new FormData(form);
+
+        result.textContent = '';
+        linkDiv.innerHTML = '';
 
         try {
           const res = await fetch('/api/upload', {
@@ -29,6 +34,14 @@
 
           const json = await res.json();
           result.textContent = JSON.stringify(json, null, 2);
+
+          if (json.downloadUrl) {
+            const link = document.createElement('a');
+            link.href = json.downloadUrl;
+            link.textContent = '⬇️ Download your file';
+            link.setAttribute('download', '');
+            linkDiv.appendChild(link);
+          }
         } catch (err) {
           result.textContent = '❌ Upload failed: ' + err.message;
         }
