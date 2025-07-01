@@ -1,0 +1,7 @@
+### Test Upload Endpoint
+POST http://localhost:3000/api/upload
+Content-Type: application/json
+
+{
+  "test": "data"
+}
