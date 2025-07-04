@@ -1,17 +1,10 @@
 import { Request, Response } from 'express';
 import multer from 'multer';
 import crypto from 'crypto';
+import fileStore, { StoredFile } from '../services/store/InMemoryFileStore';
 
 const storage = multer.memoryStorage();
 export const upload = multer({ storage });
-
-interface StoredFile {
-  buffer: Buffer;
-  originalName: string;
-  mimeType: string;
-}
-
-const fileStore = new Map<string, StoredFile>();
 
 // 👇 This is the key fix:
 interface MulterRequest extends Request {
@@ -24,10 +17,16 @@ export const handleUpload = (req: MulterRequest, res: Response) => {
   }
 
   const fileId = crypto.randomUUID();
+  const expiresIn = Number(req.body.expiresInHours || 24); // Default: 24h
+  const uploadedAt = new Date();
+  const expiresAt = new Date(uploadedAt.getTime() + expiresIn * 60 * 60 * 1000);
+
   fileStore.set(fileId, {
     buffer: req.file.buffer,
     originalName: req.file.originalname,
     mimeType: req.file.mimetype,
+    uploadedAt,
+    expiresAt,
   });
 
   const downloadUrl = `/api/download/${fileId}`;
@@ -44,7 +43,8 @@ export const handleDownload = (req: Request, res: Response) => {
   const { fileId } = req.params;
   const stored = fileStore.get(fileId);
 
-  if (!stored) {
+  if (!stored || stored.expiresAt <= new Date()) {
+    fileStore.delete(fileId);
     return res.status(404).json({ error: 'File not found or expired' });
   }
 
@@ -57,3 +57,5 @@ export const handleDownload = (req: Request, res: Response) => {
   );
   res.send(stored.buffer);
 };
+
+export default fileStore;
