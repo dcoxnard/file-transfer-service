@@ -14,9 +14,13 @@ import type { IMetadataStore } from '../services/metadata/IMetadataStore';
 import { InMemoryPaymentService } from '../services/payment/InMemoryPaymentService';
 import type { IPaymentService } from '../services/payment/IPaymentService';
 
+import { InMemoryLinkService } from '../services/link/InMemoryLinkService';
+import type { ILinkService } from '../services/link/ILinkService';
+
 export const fileStore: IFileStore = new InMemoryFileStore();
 export const metadataStore: IMetadataStore = new InMemoryMetadataStore();
 export const paymentService: IPaymentService = new InMemoryPaymentService();
+export const linkService: ILinkService = new InMemoryLinkService();
 
 const router = Router();
 
