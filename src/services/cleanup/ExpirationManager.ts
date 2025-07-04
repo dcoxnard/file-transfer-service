@@ -1,12 +1,12 @@
-import fileStore from '../store/InMemoryFileStore'; // path relative to services/cleanup
+import { fileStore } from '../../routes';
 
 export function startExpirationCleanup(intervalMs: number = 60_000) {
-  setInterval(() => {
+  setInterval(async () => {
     const now = new Date();
 
-    for (const [id, file] of fileStore.entries()) {
+    for await (const [id, file] of fileStore.entries()) {
       if (file.expiresAt <= now) {
-        fileStore.delete(id);
+        await fileStore.delete(id);
         console.log(`[CLEANUP] Deleted expired file: ${id}`);
       }
     }

@@ -1,7 +1,8 @@
 import { Request, Response } from 'express';
 import multer from 'multer';
 import crypto from 'crypto';
-import fileStore, { StoredFile } from '../services/store/InMemoryFileStore';
+
+import { fileStore } from '../routes'; // ← from src/routes/index.ts
 
 const storage = multer.memoryStorage();
 export const upload = multer({ storage });
@@ -39,16 +40,17 @@ export const handleUpload = (req: MulterRequest, res: Response) => {
   });
 };
 
-export const handleDownload = (req: Request, res: Response) => {
+export const handleDownload = async (req: Request, res: Response) => {
   const { fileId } = req.params;
-  const stored = fileStore.get(fileId);
+
+  const stored = await fileStore.get(fileId);
 
   if (!stored || stored.expiresAt <= new Date()) {
-    fileStore.delete(fileId);
+    await fileStore.delete(fileId);
     return res.status(404).json({ error: 'File not found or expired' });
   }
 
-  fileStore.delete(fileId); // one-time download
+  await fileStore.delete(fileId); // one-time download
 
   res.setHeader('Content-Type', stored.mimeType);
   res.setHeader(
