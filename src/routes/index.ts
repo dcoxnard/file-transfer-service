@@ -20,6 +20,9 @@ import type { ILinkService } from '../services/link/ILinkService';
 import { InMemoryCleanupService } from '../services/cleanup/InMemoryCleanupService';
 import type { ICleanupService } from '../services/cleanup/ICleanupService';
 
+import { ConsoleLoggingService } from '../services/logging/ConsoleLoggingService';
+import type { ILoggingService } from '../services/logging/ILoggingService';
+
 const fileStore: IFileStore = new InMemoryFileStore();
 const metadataStore: IMetadataStore = new InMemoryMetadataStore();
 const paymentService: IPaymentService = new InMemoryPaymentService();
@@ -29,6 +32,7 @@ const cleanupService: ICleanupService = new InMemoryCleanupService(
   metadataStore,
   linkService
 );
+const loggingService: ILoggingService = new ConsoleLoggingService();
 
 const router = Router();
 
@@ -41,6 +45,7 @@ export {
   paymentService,
   linkService,
   cleanupService,
+  loggingService,
 };
 
 export default router;

@@ -2,7 +2,12 @@ import { Request, Response } from 'express';
 import multer from 'multer';
 import crypto from 'crypto';
 
-import { fileStore, metadataStore, linkService } from '../routes'; // ← from src/routes/index.ts
+import {
+  fileStore,
+  metadataStore,
+  linkService,
+  loggingService,
+} from '../routes'; // ← from src/routes/index.ts
 
 const storage = multer.memoryStorage();
 export const upload = multer({ storage });
@@ -37,6 +42,8 @@ export const handleUpload = async (req: MulterRequest, res: Response) => {
 
   const linkId = await linkService.create(fileId, expiresAt);
   const downloadUrl = `/api/download/${linkId}`;
+
+  await loggingService.info('File uploaded', { fileId });
 
   res.json({
     message: 'Upload successful',
