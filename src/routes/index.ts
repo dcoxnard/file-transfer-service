@@ -17,14 +17,30 @@ import type { IPaymentService } from '../services/payment/IPaymentService';
 import { InMemoryLinkService } from '../services/link/InMemoryLinkService';
 import type { ILinkService } from '../services/link/ILinkService';
 
-export const fileStore: IFileStore = new InMemoryFileStore();
-export const metadataStore: IMetadataStore = new InMemoryMetadataStore();
-export const paymentService: IPaymentService = new InMemoryPaymentService();
-export const linkService: ILinkService = new InMemoryLinkService();
+import { InMemoryCleanupService } from '../services/cleanup/InMemoryCleanupService';
+import type { ICleanupService } from '../services/cleanup/ICleanupService';
+
+const fileStore: IFileStore = new InMemoryFileStore();
+const metadataStore: IMetadataStore = new InMemoryMetadataStore();
+const paymentService: IPaymentService = new InMemoryPaymentService();
+const linkService: ILinkService = new InMemoryLinkService();
+const cleanupService: ICleanupService = new InMemoryCleanupService(
+  fileStore,
+  metadataStore,
+  linkService
+);
 
 const router = Router();
 
 router.post('/upload', upload.single('file'), handleUpload);
 router.get('/download/:fileId', handleDownload);
+
+export {
+  fileStore,
+  metadataStore,
+  paymentService,
+  linkService,
+  cleanupService,
+};
 
 export default router;
