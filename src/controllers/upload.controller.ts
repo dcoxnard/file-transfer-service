@@ -2,7 +2,7 @@ import { Request, Response } from 'express';
 import multer from 'multer';
 import crypto from 'crypto';
 
-import { fileStore } from '../routes'; // ← from src/routes/index.ts
+import { fileStore, metadataStore } from '../routes'; // ← from src/routes/index.ts
 
 const storage = multer.memoryStorage();
 export const upload = multer({ storage });
@@ -12,7 +12,7 @@ interface MulterRequest extends Request {
   file?: Express.Multer.File;
 }
 
-export const handleUpload = (req: MulterRequest, res: Response) => {
+export const handleUpload = async (req: MulterRequest, res: Response) => {
   if (!req.file) {
     return res.status(400).json({ error: 'No file uploaded' });
   }
@@ -22,10 +22,19 @@ export const handleUpload = (req: MulterRequest, res: Response) => {
   const uploadedAt = new Date();
   const expiresAt = new Date(uploadedAt.getTime() + expiresIn * 60 * 60 * 1000);
 
-  fileStore.set(fileId, {
+  await fileStore.set(fileId, {
     buffer: req.file.buffer,
     originalName: req.file.originalname,
     mimeType: req.file.mimetype,
+    uploadedAt,
+    expiresAt,
+  });
+
+  await metadataStore.set({
+    id: fileId,
+    originalName: req.file.originalname,
+    mimeType: req.file.mimetype,
+    size: req.file.size,
     uploadedAt,
     expiresAt,
   });
@@ -59,5 +68,3 @@ export const handleDownload = async (req: Request, res: Response) => {
   );
   res.send(stored.buffer);
 };
-
-export default fileStore;
