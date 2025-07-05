@@ -7,6 +7,7 @@ import {
   metadataStore,
   linkService,
   loggingService,
+  notificationService,
 } from '../routes'; // ← from src/routes/index.ts
 
 const storage = multer.memoryStorage();
@@ -44,6 +45,13 @@ export const handleUpload = async (req: MulterRequest, res: Response) => {
   const downloadUrl = `/api/download/${linkId}`;
 
   await loggingService.info('File uploaded', { fileId });
+
+  await notificationService.send({
+    to: 'user@example.com',
+    channel: 'email',
+    subject: 'Your file was uploaded successfully',
+    body: 'You can now share your download link.',
+  });
 
   res.json({
     message: 'Upload successful',
