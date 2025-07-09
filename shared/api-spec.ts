@@ -6,43 +6,41 @@
  * 1. Create Stripe Checkout Session
  */
 export type CreatePaymentSessionRequest = {
-  filename: string
-  filesize: number // bytes
-}
+  fileId: string;
+  currency: string;
+  amount: number;
+};
 
 export type CreatePaymentSessionResponse = {
-  sessionUrl: string // redirect user here to complete payment
-}
-
+  sessionUrl: string; // redirect user here to complete payment
+};
 
 /**
  * 2. Upload File (after successful payment)
  * Assumes the frontend POSTs FormData with file contents.
  */
 export type UploadFileRequestHeaders = {
-  authorization: `Bearer ${string}` // from Stripe session or backend
-}
+  authorization: `Bearer ${string}`; // from Stripe session or backend
+};
 
 export type UploadFileResponse = {
-  fileId: string
-  expiresAt: string // ISO timestamp
-  downloadUrl: string // full link with token
-}
-
+  fileId: string;
+  expiresAt: string; // ISO timestamp
+  downloadUrl: string; // full link with token
+};
 
 /**
  * 3. Get Download Metadata
  * (called when user visits a link, to preview or confirm before downloading)
  */
 export type GetDownloadMetadataResponse = {
-  fileId: string
-  filename: string
-  size: number // bytes
-  expiresAt: string // ISO timestamp
-  isExpired: boolean
-  expiredAt?: string // if expired
-}
-
+  fileId: string;
+  filename: string;
+  size: number; // bytes
+  expiresAt: string; // ISO timestamp
+  isExpired: boolean;
+  expiredAt?: string; // if expired
+};
 
 /**
  * 4. Download File
@@ -50,15 +48,14 @@ export type GetDownloadMetadataResponse = {
  * Errors if expired or already used.
  */
 export type DownloadFileParams = {
-  fileId: string
-  token: string // included in the link
-}
-
+  fileId: string;
+  token: string; // included in the link
+};
 
 /**
  * 5. Error format (shared across all endpoints)
  */
 export type APIErrorResponse = {
-  error: string
-  details?: string
-}
+  error: string;
+  details?: string;
+};
